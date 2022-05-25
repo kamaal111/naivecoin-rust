@@ -3,5 +3,8 @@ use models::blockchain::Blockchain;
 
 fn main() {
     let blockchain = Blockchain::new();
-    println!("{:?}", blockchain.get_latest_block().unwrap().hash);
+    match blockchain.generate_next_block() {
+        Err(error) => println!("error parsing header: {error:?}"),
+        Ok(_) => println!("everything ok"),
+    }
 }
