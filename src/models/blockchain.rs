@@ -1,6 +1,5 @@
 use super::block::Block;
 
-#[derive(Debug)]
 pub struct Blockchain {
     blocks: Vec<Block>,
 }
@@ -18,5 +17,12 @@ impl Blockchain {
         Blockchain {
             blocks: vec![genesis_block],
         }
+    }
+}
+
+impl Blockchain {
+    pub fn get_latest_block(&self) -> Option<&Block> {
+        let block = self.blocks.last().clone();
+        block
     }
 }

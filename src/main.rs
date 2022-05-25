@@ -3,5 +3,5 @@ use models::blockchain::Blockchain;
 
 fn main() {
     let blockchain = Blockchain::new();
-    println!("{:#?}", blockchain);
+    println!("{:?}", blockchain.get_latest_block().unwrap().hash);
 }

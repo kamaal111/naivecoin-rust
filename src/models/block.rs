@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Clone)]
 pub struct Block {
     pub index: u64,
     pub hash: String,
