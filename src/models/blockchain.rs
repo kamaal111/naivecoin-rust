@@ -2,7 +2,6 @@ use super::block::Block;
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 pub struct Blockchain {
@@ -38,24 +37,23 @@ impl Blockchain {
         };
 
         let hashing_payload =
-            HashingPayload::from_block_for_new_block(&latest_block, String::from("data"));
-
-        calculate_hash(hashing_payload);
+            HashingPayload::from_block_for_next_block(&latest_block, String::from("data"));
+        let hash = calculate_hash(hashing_payload);
+        println!("{}", hash);
 
         return Ok(());
     }
 }
 
-#[derive(Serialize, Deserialize)]
 struct HashingPayload {
     index: u64,
-    parent_hash: String,
+    parent_hash: Option<String>,
     timestamp: u64,
     data: String,
 }
 
 impl HashingPayload {
-    fn from_block_for_new_block(block: &Block, data: String) -> HashingPayload {
+    fn from_block_for_next_block(block: &Block, data: String) -> HashingPayload {
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -63,20 +61,24 @@ impl HashingPayload {
 
         HashingPayload {
             index: block.index + 1,
-            parent_hash: block.hash.clone(),
+            parent_hash: Some(block.hash.clone()),
             timestamp,
             data,
         }
     }
 }
 
-fn calculate_hash(payload: HashingPayload) -> Result<(), &'static str> {
-    let payload = match serde_json::to_vec(&payload) {
-        Err(_) => return Err("could not parse hashing payload"),
-        Ok(value) => value,
-    };
+fn calculate_hash(payload: HashingPayload) -> String {
+    let payload_string = format!(
+        "{}{}{}{}",
+        payload.index,
+        payload.parent_hash.unwrap_or("".to_string()),
+        payload.timestamp,
+        payload.data
+    );
 
-    let hash = Sha256::digest(payload).to_vec();
+    let hash_array = Sha256::digest(payload_string);
+    let hash = format!("{:x}", hash_array);
 
-    return Ok(());
+    return hash;
 }
