@@ -14,13 +14,15 @@ pub async fn listen() -> std::io::Result<()> {
 
 #[get("/")]
 async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
+    HttpResponse::Ok()
+        .append_header((http::header::CONTENT_TYPE, "application/json"))
+        .body("{\"hello\": \"world\"}")
 }
 
 #[get("/blocks")]
 async fn get_blocks() -> impl Responder {
     let blockchain = Blockchain::new();
-    let blocks = serde_json::to_string_pretty(&blockchain.blocks()).unwrap();
+    let blocks = serde_json::to_string(&blockchain.blocks()).unwrap();
 
     HttpResponse::Ok()
         .append_header((http::header::CONTENT_TYPE, "application/json"))
