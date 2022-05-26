@@ -1,12 +1,8 @@
-mod models;
-use models::blockchain::Blockchain;
+mod server;
 
-fn main() {
-    let mut blockchain = Blockchain::new();
-    match blockchain.generate_next_block("data".to_string()) {
-        Err(error) => println!("error: {error:?}"),
-        Ok(void) => void,
-    }
+use actix_web::main as server_entry;
 
-    println!("{:#?}", blockchain.blocks());
+#[server_entry]
+async fn main() -> std::io::Result<()> {
+    server::listen().await
 }

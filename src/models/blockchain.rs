@@ -47,7 +47,7 @@ impl Blockchain {
 
         match self.add_to_chain(next_block) {
             Err(error) => return Err(error),
-            Ok(void) => void,
+            Ok(_) => (),
         };
 
         return Ok(());
