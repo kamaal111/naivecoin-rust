@@ -12,10 +12,10 @@ impl Blockchain {
     pub fn new() -> Blockchain {
         let genesis_block = Block {
             index: 0,
-            hash: String::from("cd2fb2ace926608315b2a5bd1bc2a259dce057a21ed63351adc0b1326da2a99e"),
+            hash: "cd2fb2ace926608315b2a5bd1bc2a259dce057a21ed63351adc0b1326da2a99e".to_string(),
             parent_hash: None,
             timestamp: 1652722519,
-            data: String::from("The Genesis block!!!"),
+            data: "The Genesis block!!!".to_string(),
         };
 
         Blockchain {
@@ -25,21 +25,22 @@ impl Blockchain {
 }
 
 impl Blockchain {
-    pub fn get_latest_block(&self) -> Option<&Block> {
-        let block = self.blocks.last().clone();
-        block
-    }
-
-    pub fn generate_next_block(&self) -> Result<(), &'static str> {
-        let latest_block = match self.get_latest_block() {
+    pub fn generate_next_block(&self, data: String) -> Result<(), &'static str> {
+        let latest_block = match self.blocks.last() {
             None => return Err("could not get latest block"),
             Some(value) => value,
         };
 
-        let hashing_payload =
-            HashingPayload::from_block_for_next_block(&latest_block, String::from("data"));
-        let hash = calculate_hash(hashing_payload);
-        println!("{}", hash);
+        let payload = HashingPayload::from_block_for_next_block(latest_block, data);
+        let hash = calculate_hash(&payload);
+        let next_block = Block {
+            index: payload.index,
+            hash,
+            parent_hash: payload.parent_hash,
+            timestamp: payload.timestamp,
+            data: payload.data,
+        };
+        println!("{:#?}", next_block);
 
         return Ok(());
     }
@@ -68,11 +69,11 @@ impl HashingPayload {
     }
 }
 
-fn calculate_hash(payload: HashingPayload) -> String {
+fn calculate_hash(payload: &HashingPayload) -> String {
     let payload_string = format!(
         "{}{}{}{}",
         payload.index,
-        payload.parent_hash.unwrap_or("".to_string()),
+        payload.parent_hash.clone().unwrap_or("".to_string()),
         payload.timestamp,
         payload.data
     );
