@@ -25,6 +25,10 @@ impl Blockchain {
 }
 
 impl Blockchain {
+    pub fn blocks(&self) -> Vec<Block> {
+        self.blocks.clone()
+    }
+
     pub fn generate_next_block(&mut self, data: String) -> Result<(), &'static str> {
         let latest_block = match self.blocks.last() {
             None => return Err("could not get latest block"),
@@ -65,7 +69,9 @@ impl Blockchain {
 
 impl Blockchain {
     fn validate_next_block(&self, next_block: &Block, previous_block: &Block) -> bool {
-        return false;
+        next_block.index == previous_block.index + 1
+            && next_block.parent_hash == Some(previous_block.hash.clone())
+            && next_block.hash.clone() == calculate_hash(&HashingPayload::from_block(next_block))
     }
 }
 
@@ -88,6 +94,15 @@ impl HashingPayload {
             parent_hash: Some(block.hash.clone()),
             timestamp,
             data,
+        }
+    }
+
+    fn from_block(block: &Block) -> HashingPayload {
+        HashingPayload {
+            index: block.index,
+            parent_hash: block.parent_hash.clone(),
+            timestamp: block.timestamp,
+            data: block.data.clone(),
         }
     }
 }
