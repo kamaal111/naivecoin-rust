@@ -1,21 +1,30 @@
-// mod models;
-// use models::blockchain::Blockchain;
+#[path = "models/mod.rs"]
+mod models;
+use models::blockchain::Blockchain;
 
-use actix_web::{get, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, http, App, HttpResponse, HttpServer, Responder};
 
 pub async fn listen() -> std::io::Result<()> {
     let port = 8080;
-
     println!("listening on {}", port);
-    HttpServer::new(|| App::new().service(hello))
-        .bind(("127.0.0.1", port))?
-        .run()
-        .await
+
+    let app = || App::new().service(hello).service(get_blocks);
+    HttpServer::new(app).bind(("127.0.0.1", port))?.run().await
 }
 
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
+}
+
+#[get("/blocks")]
+async fn get_blocks() -> impl Responder {
+    let blockchain = Blockchain::new();
+    let blocks = serde_json::to_string_pretty(&blockchain.blocks()).unwrap();
+
+    HttpResponse::Ok()
+        .append_header((http::header::CONTENT_TYPE, "application/json"))
+        .body(blocks)
 }
 
 // fn main() {
@@ -24,6 +33,4 @@ async fn hello() -> impl Responder {
 //         Err(error) => println!("error: {error:?}"),
 //         Ok(_) => (),
 //     }
-
-//     println!("{:#?}", blockchain.blocks());
 // }

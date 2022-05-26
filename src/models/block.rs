@@ -1,4 +1,6 @@
-#[derive(Clone, Debug)]
+use serde::Serialize;
+
+#[derive(Clone, Serialize)]
 pub struct Block {
     pub index: u64,
     pub hash: String,
