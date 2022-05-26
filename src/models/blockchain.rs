@@ -25,7 +25,7 @@ impl Blockchain {
 }
 
 impl Blockchain {
-    pub fn generate_next_block(&self, data: String) -> Result<(), &'static str> {
+    pub fn generate_next_block(&mut self, data: String) -> Result<(), &'static str> {
         let latest_block = match self.blocks.last() {
             None => return Err("could not get latest block"),
             Some(value) => value,
@@ -40,9 +40,32 @@ impl Blockchain {
             timestamp: payload.timestamp,
             data: payload.data,
         };
-        println!("{:#?}", next_block);
+
+        match self.add_to_chain(next_block) {
+            Err(error) => return Err(error),
+            Ok(void) => void,
+        };
 
         return Ok(());
+    }
+
+    pub fn add_to_chain(&mut self, next_block: Block) -> Result<(), &'static str> {
+        let latest_block = self.blocks.last().unwrap();
+
+        let next_block_is_valid = self.validate_next_block(&next_block, latest_block);
+        if !next_block_is_valid {
+            return Err("invalid new block");
+        }
+
+        self.blocks.push(next_block);
+
+        return Ok(());
+    }
+}
+
+impl Blockchain {
+    fn validate_next_block(&self, next_block: &Block, previous_block: &Block) -> bool {
+        return false;
     }
 }
 
