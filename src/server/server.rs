@@ -1,28 +1,38 @@
+use super::database::Database;
 use super::error_responses;
 use super::mime;
 use super::models::blockchain::Blockchain;
 
-use actix_web::{get, http, post, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, http, post, web, App, HttpResponse, HttpServer, Responder};
 use serde_json::Value;
+
+#[derive(Debug)]
+struct AppState(String);
 
 pub async fn listen() -> std::io::Result<()> {
     let port = 8080;
     println!("listening on {}", port);
 
-    let app = || {
+    let connection = Database::connect().expect("could not connect to database");
+
+    let app_state = web::Data::new(AppState("Kamaal".to_string()));
+    let app = move || {
         App::new()
+            .app_data(app_state.clone())
             .service(hello)
             .service(get_blocks)
             .service(mine_blocks)
     };
-    HttpServer::new(app).bind(("127.0.0.1", port))?.run().await
+
+    let server = HttpServer::new(app).bind(("127.0.0.1", port));
+    server?.run().await
 }
 
 #[get("/")]
-async fn hello() -> impl Responder {
+async fn hello(data: web::Data<AppState>) -> impl Responder {
     HttpResponse::Ok()
         .append_header((http::header::CONTENT_TYPE, mime::APPLICATION_JSON))
-        .body("{\"hello\": \"world\"}")
+        .body(format!("{{\"hello\": \"{}\"}}", data.0))
 }
 
 #[get("/blocks")]
