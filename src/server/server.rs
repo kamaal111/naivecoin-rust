@@ -1,7 +1,6 @@
+use super::error_responses;
+use super::mime;
 use super::models::blockchain::Blockchain;
-
-#[path = "mime.rs"]
-mod mime;
 
 use actix_web::{get, http, post, App, HttpResponse, HttpServer, Responder};
 use serde_json::Value;
@@ -40,13 +39,13 @@ async fn get_blocks() -> impl Responder {
 async fn mine_blocks(request_body: String) -> impl Responder {
     if request_body.len() < 2 {
         println!("error: invalid payload");
-        return bad_request();
+        return error_responses::bad_request();
     }
 
     let request_body: Value = match serde_json::from_str(&request_body) {
         Err(_) => {
             println!("error: invalid payload");
-            return bad_request();
+            return error_responses::bad_request();
         }
         Ok(value) => value,
     };
@@ -54,12 +53,12 @@ async fn mine_blocks(request_body: String) -> impl Responder {
     let data = match request_body.get("data") {
         None => {
             println!("error: invalid payload");
-            return bad_request();
+            return error_responses::bad_request();
         }
         Some(value) => match value.as_str() {
             None => {
                 println!("error: invalid payload");
-                return bad_request();
+                return error_responses::bad_request();
             }
             Some(value) => value,
         },
@@ -70,16 +69,10 @@ async fn mine_blocks(request_body: String) -> impl Responder {
     match blockchain.generate_next_block(data) {
         Err(err) => {
             println!("error: {}", err);
-            return bad_request();
+            return error_responses::bad_request();
         }
         Ok(()) => (),
     };
 
     HttpResponse::NoContent().body("")
-}
-
-fn bad_request() -> HttpResponse {
-    HttpResponse::BadRequest()
-        .append_header((http::header::CONTENT_TYPE, mime::APPLICATION_JSON))
-        .body("{\"details\": \"Bad Request\"}")
 }
