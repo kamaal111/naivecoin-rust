@@ -53,7 +53,7 @@ impl Blockchain {
         return Ok(());
     }
 
-    pub fn add_to_chain(&mut self, next_block: Block) -> Result<(), &'static str> {
+    fn add_to_chain(&mut self, next_block: Block) -> Result<(), &'static str> {
         let latest_block = self.blocks.last().unwrap();
 
         let next_block_is_valid = self.validate_next_block(&next_block, latest_block);
