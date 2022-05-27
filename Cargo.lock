@@ -650,7 +650,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "naivecoin-rust"
+name = "naivecoin"
 version = "0.1.0"
 dependencies = [
  "actix-web",
