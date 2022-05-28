@@ -4,21 +4,33 @@ use super::mime;
 use super::models::blockchain::Blockchain;
 
 use actix_web::{get, http, post, web, App, HttpResponse, HttpServer, Responder};
+use mongodb::Client;
 use serde_json::Value;
 
-#[derive(Debug)]
-struct AppState(String);
+#[derive(Debug, Clone)]
+struct AppState {
+    database: Option<Client>,
+}
 
 pub async fn listen() -> std::io::Result<()> {
     let port = 8080;
     println!("listening on {}", port);
 
-    let connection = Database::connect().expect("could not connect to database");
+    let connection: Option<Client> = match Database::connect().await {
+        Err(error) => {
+            println!("error connecting to database: {}", error);
+            None
+        }
+        Ok(value) => Some(value),
+    };
 
-    let app_state = web::Data::new(AppState("Kamaal".to_string()));
     let app = move || {
+        let app_data = AppState {
+            database: connection.clone(),
+        };
+
         App::new()
-            .app_data(app_state.clone())
+            .app_data(web::Data::new(app_data))
             .service(hello)
             .service(get_blocks)
             .service(mine_blocks)
@@ -32,7 +44,7 @@ pub async fn listen() -> std::io::Result<()> {
 async fn hello(data: web::Data<AppState>) -> impl Responder {
     HttpResponse::Ok()
         .append_header((http::header::CONTENT_TYPE, mime::APPLICATION_JSON))
-        .body(format!("{{\"hello\": \"{}\"}}", data.0))
+        .body(format!("{{\"hello\": \"{}\"}}", "Kamaal"))
 }
 
 #[get("/blocks")]

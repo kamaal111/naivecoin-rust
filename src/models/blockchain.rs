@@ -111,7 +111,10 @@ fn calculate_hash(payload: &HashingPayload) -> String {
     let payload_string = format!(
         "{}{}{}{}",
         payload.index,
-        payload.parent_hash.clone().unwrap_or("".to_string()),
+        payload
+            .parent_hash
+            .clone()
+            .unwrap_or_else(|| "".to_string()),
         payload.timestamp,
         payload.data
     );
