@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  db:
+    image: mongo
+    container_name: naivecoin-db
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./data/db:/var/lib/mongodb/data
+    ports:
+      - 27017:27017
+    restart: unless-stopped
+
+  server:
+    build:
+      context: .
+      dockerfile: ./docker/DockerFile.node
+    volumes:
+      - .:/usr/src/naivecoin
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
