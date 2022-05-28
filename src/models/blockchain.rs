@@ -10,17 +10,7 @@ pub struct Blockchain {
 
 impl Blockchain {
     pub fn new() -> Blockchain {
-        let genesis_block = Block {
-            index: 0,
-            hash: "cd2fb2ace926608315b2a5bd1bc2a259dce057a21ed63351adc0b1326da2a99e".to_string(),
-            parent_hash: None,
-            timestamp: 1652722519,
-            data: "The Genesis block!!!".to_string(),
-        };
-
-        Blockchain {
-            blocks: vec![genesis_block],
-        }
+        Blockchain { blocks: vec![] }
     }
 }
 
