@@ -1,3 +1,3 @@
 pub mod blockchain;
 
-mod block;
+pub mod block;

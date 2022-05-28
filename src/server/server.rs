@@ -9,7 +9,7 @@ use serde_json::Value;
 
 #[derive(Debug, Clone)]
 struct AppState {
-    database: Option<Client>,
+    database_client: Option<Client>,
 }
 
 pub async fn listen() -> std::io::Result<()> {
@@ -26,7 +26,7 @@ pub async fn listen() -> std::io::Result<()> {
 
     let app = move || {
         let app_data = AppState {
-            database: connection.clone(),
+            database_client: connection.clone(),
         };
 
         App::new()
@@ -41,7 +41,7 @@ pub async fn listen() -> std::io::Result<()> {
 }
 
 #[get("/")]
-async fn hello(data: web::Data<AppState>) -> impl Responder {
+async fn hello() -> impl Responder {
     HttpResponse::Ok()
         .append_header((http::header::CONTENT_TYPE, mime::APPLICATION_JSON))
         .body(format!("{{\"hello\": \"{}\"}}", "Kamaal"))
@@ -58,7 +58,7 @@ async fn get_blocks() -> impl Responder {
 }
 
 #[post("/blocks")]
-async fn mine_blocks(request_body: String) -> impl Responder {
+async fn mine_blocks(data: web::Data<AppState>, request_body: String) -> impl Responder {
     if request_body.len() < 2 {
         println!("error: invalid payload");
         return error_responses::bad_request();

@@ -1,6 +1,6 @@
-use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
+use super::models::block::Block;
 
-const DATABASE_NAME: &'static str = "naivecoin";
+use mongodb::Client;
 
 pub struct Database {}
 
@@ -14,45 +14,11 @@ impl Database {
             Ok(value) => value,
         };
 
-        let _ = match User::create_index(&client).await {
+        match Block::create_index(&client).await {
             Err(error) => return Err(error),
             Ok(_) => (),
         };
 
         Ok(client)
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct User {
-    pub first_name: String,
-    pub last_name: String,
-    pub username: String,
-    pub email: String,
-}
-
-impl User {
-    fn collection_name() -> &'static str {
-        "users"
-    }
-
-    async fn create_index(client: &Client) -> Result<(), &'static str> {
-        let options = IndexOptions::builder().unique(true).build();
-        let model = IndexModel::builder()
-            .keys(doc! { "username": 1 })
-            .options(options)
-            .build();
-
-        let _ = match client
-            .database(DATABASE_NAME)
-            .collection::<User>(User::collection_name())
-            .create_index(model, None)
-            .await
-        {
-            Err(_) => return Err("failed to create user index"),
-            Ok(_) => (),
-        };
-
-        Ok(())
     }
 }
