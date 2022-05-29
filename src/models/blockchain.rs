@@ -6,14 +6,12 @@ use mongodb::Client;
 use sha2::{Digest, Sha256};
 
 pub struct Blockchain {
-    blocks: Vec<Block>,
     context: Client,
 }
 
 impl Blockchain {
     pub fn new(client: &Client) -> Blockchain {
         Blockchain {
-            blocks: vec![],
             context: client.clone(),
         }
     }
