@@ -1,13 +1,17 @@
 import type {Request, Response} from 'express';
 
-import type {AppController} from '../types';
+import Peers from '../models/peers';
 
-class PeersController implements AppController {
-  constructor() {}
+class PeersController {
+  private peers: Peers;
 
-  public getPeers(request: Request, response: Response) {
-    response.send({});
+  constructor() {
+    this.peers = new Peers();
   }
+
+  public getPeers = (_request: Request, response: Response) => {
+    response.send(this.peers.socketAddresses);
+  };
 
   public addPeer(request: Request, response: Response) {
     response.send({});

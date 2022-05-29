@@ -8,9 +8,10 @@ class PeersRouter implements AppRouter {
   public path = '/peers';
   public router = Router();
 
-  private controller = new PeersController();
+  private controller: PeersController;
 
   constructor() {
+    this.controller = new PeersController();
     this.initializeMiddleware();
     this.initializeRoutes();
   }

@@ -4,5 +4,3 @@ export type AppRouter = {
   path: string;
   router: Router;
 };
-
-export type AppController = {};
