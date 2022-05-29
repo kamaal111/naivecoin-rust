@@ -27,7 +27,7 @@ impl Blockchain {
         Ok(all_blocks)
     }
 
-    pub async fn generate_next_block(&mut self, data: String) -> Result<(), &'static str> {
+    pub async fn generate_next_block(&self, data: String) -> Result<(), &'static str> {
         // TODO: Get last block from database instead
         let blocks = match self.blocks().await {
             Err(error) => return Err(error),
@@ -59,7 +59,7 @@ impl Blockchain {
     }
 
     async fn add_to_chain(
-        &mut self,
+        &self,
         next_block: &Block,
         latest_block: &Block,
     ) -> Result<(), &'static str> {
