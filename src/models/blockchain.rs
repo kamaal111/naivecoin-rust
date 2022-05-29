@@ -26,6 +26,7 @@ impl Blockchain {
             Ok(value) => value,
         };
 
+        println!("{:#?}", all_blocks);
         Ok(all_blocks)
     }
 

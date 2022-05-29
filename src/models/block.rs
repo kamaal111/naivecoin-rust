@@ -1,3 +1,4 @@
+use futures::stream::TryStreamExt;
 use mongodb::{
     bson::doc, options::IndexOptions, results as mongodb_results, Client, Collection, IndexModel,
 };
@@ -5,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 const DATABASE_NAME: &'static str = "naivecoin";
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Block {
     pub index: u64,
     pub hash: String,
@@ -57,6 +58,7 @@ impl Block {
         let cursor = Block::collection(&client).find(None, None).await;
 
         let mut blocks: Vec<Block> = Vec::new();
+
         for doc in cursor {
             let block = match doc.deserialize_current() {
                 Err(error) => {
