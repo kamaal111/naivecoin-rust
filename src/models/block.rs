@@ -1,6 +1,8 @@
 use futures::stream::TryStreamExt;
 use mongodb::{
-    bson::doc, options::IndexOptions, results as mongodb_results, Client, Collection, IndexModel,
+    bson::doc,
+    options::{FindOptions, IndexOptions},
+    results as mongodb_results, Client, Collection, IndexModel,
 };
 use serde::{Deserialize, Serialize};
 
@@ -55,18 +57,16 @@ impl Block {
     }
 
     pub async fn get_all(client: &Client) -> Result<Vec<Block>, &'static str> {
-        let cursor = Block::collection(&client).find(None, None).await;
+        let mut cursor = match Block::collection(&client).find(None, None).await {
+            Err(err) => {
+                println!("error getting all blocks: {:?}", err);
+                return Err("failed to get all blocks");
+            }
+            Ok(value) => value,
+        };
 
         let mut blocks: Vec<Block> = Vec::new();
-
-        for doc in cursor {
-            let block = match doc.deserialize_current() {
-                Err(error) => {
-                    println!("{:?}", error);
-                    return Err("failed to deserialize document");
-                }
-                Ok(value) => value,
-            };
+        while let Some(block) = cursor.try_next().await.unwrap_or(None) {
             blocks.push(block);
         }
 

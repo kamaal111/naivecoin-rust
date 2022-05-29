@@ -26,7 +26,6 @@ impl Blockchain {
             Ok(value) => value,
         };
 
-        println!("{:#?}", all_blocks);
         Ok(all_blocks)
     }
 
@@ -41,6 +40,7 @@ impl Blockchain {
             None => return Err("could not get latest block"),
             Some(value) => value,
         };
+        println!("last block {:?}", latest_block);
 
         let payload = HashingPayload::from_block_for_next_block(&latest_block, data);
         let hash = calculate_hash(&payload);
