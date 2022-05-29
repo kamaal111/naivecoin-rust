@@ -29,13 +29,19 @@ impl Blockchain {
         Ok(all_blocks)
     }
 
-    pub fn generate_next_block(&mut self, data: String) -> Result<(), &'static str> {
-        let latest_block = match self.blocks.last() {
+    pub async fn generate_next_block(&mut self, data: String) -> Result<(), &'static str> {
+        // TODO: Get last block from database instead
+        let blocks = match self.blocks().await {
+            Err(error) => return Err(error),
+            Ok(value) => value,
+        };
+
+        let latest_block = match blocks.last() {
             None => return Err("could not get latest block"),
             Some(value) => value,
         };
 
-        let payload = HashingPayload::from_block_for_next_block(latest_block, data);
+        let payload = HashingPayload::from_block_for_next_block(&latest_block, data);
         let hash = calculate_hash(&payload);
         let next_block = Block {
             index: payload.index,
@@ -45,7 +51,7 @@ impl Blockchain {
             data: payload.data,
         };
 
-        match self.add_to_chain(next_block) {
+        match self.add_to_chain(&next_block, &latest_block).await {
             Err(error) => return Err(error),
             Ok(_) => (),
         };
@@ -53,24 +59,29 @@ impl Blockchain {
         return Ok(());
     }
 
-    fn add_to_chain(&mut self, next_block: Block) -> Result<(), &'static str> {
-        let latest_block = self.blocks.last().unwrap();
-
-        let next_block_is_valid = self.validate_next_block(&next_block, latest_block);
+    async fn add_to_chain(
+        &mut self,
+        next_block: &Block,
+        latest_block: &Block,
+    ) -> Result<(), &'static str> {
+        let next_block_is_valid = self.validate_next_block(&next_block, &latest_block);
         if !next_block_is_valid {
             return Err("invalid new block");
         }
 
-        self.blocks.push(next_block);
+        match next_block.insert(&self.context).await {
+            Err(error) => return Err(error),
+            Ok(value) => value,
+        };
 
         return Ok(());
     }
 }
 
 impl Blockchain {
-    fn validate_next_block(&self, next_block: &Block, previous_block: &Block) -> bool {
-        next_block.index == previous_block.index + 1
-            && next_block.parent_hash == Some(previous_block.hash.clone())
+    fn validate_next_block(&self, next_block: &Block, latest_block: &Block) -> bool {
+        next_block.index == latest_block.index + 1
+            && next_block.parent_hash == Some(latest_block.hash.clone())
             && next_block.hash.clone() == calculate_hash(&HashingPayload::from_block(next_block))
     }
 }

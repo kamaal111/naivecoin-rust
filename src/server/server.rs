@@ -92,7 +92,7 @@ async fn mine_blocks(data: web::Data<AppState>, request_body: String) -> impl Re
     let database_client = data.database_client.clone().unwrap();
     let mut blockchain = Blockchain::new(&database_client);
 
-    match blockchain.generate_next_block(payload) {
+    match blockchain.generate_next_block(payload).await {
         Err(err) => {
             println!("error: {}", err);
             return error_responses::bad_request();
