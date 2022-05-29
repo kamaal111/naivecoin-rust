@@ -48,13 +48,15 @@ async fn hello() -> impl Responder {
 }
 
 #[get("/blocks")]
-async fn get_blocks() -> impl Responder {
-    let blockchain = Blockchain::new();
-    let blocks = serde_json::to_string(&blockchain.blocks()).unwrap();
+async fn get_blocks(data: web::Data<AppState>) -> impl Responder {
+    let database_client = data.database_client.clone().unwrap();
+    let blockchain = Blockchain::new(&database_client);
+
+    let blocks = blockchain.blocks().await.expect("failed to get blocks");
 
     HttpResponse::Ok()
         .append_header((http::header::CONTENT_TYPE, mime::APPLICATION_JSON))
-        .body(blocks)
+        .json(blocks)
 }
 
 #[post("/blocks")]
@@ -72,7 +74,7 @@ async fn mine_blocks(data: web::Data<AppState>, request_body: String) -> impl Re
         Ok(value) => value,
     };
 
-    let data = match request_body.get("data") {
+    let payload = match request_body.get("data") {
         None => {
             println!("error: invalid payload");
             return error_responses::bad_request();
@@ -87,8 +89,10 @@ async fn mine_blocks(data: web::Data<AppState>, request_body: String) -> impl Re
     }
     .to_string();
 
-    let mut blockchain = Blockchain::new();
-    match blockchain.generate_next_block(data) {
+    let database_client = data.database_client.clone().unwrap();
+    let mut blockchain = Blockchain::new(&database_client);
+
+    match blockchain.generate_next_block(payload) {
         Err(err) => {
             println!("error: {}", err);
             return error_responses::bad_request();

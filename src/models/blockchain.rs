@@ -2,21 +2,31 @@ use super::block::Block;
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use mongodb::Client;
 use sha2::{Digest, Sha256};
 
 pub struct Blockchain {
     blocks: Vec<Block>,
+    context: Client,
 }
 
 impl Blockchain {
-    pub fn new() -> Blockchain {
-        Blockchain { blocks: vec![] }
+    pub fn new(client: &Client) -> Blockchain {
+        Blockchain {
+            blocks: vec![],
+            context: client.clone(),
+        }
     }
 }
 
 impl Blockchain {
-    pub fn blocks(&self) -> Vec<Block> {
-        self.blocks.clone()
+    pub async fn blocks(&self) -> Result<Vec<Block>, &'static str> {
+        let all_blocks = match Block::get_all(&self.context).await {
+            Err(error) => return Err(error),
+            Ok(value) => value,
+        };
+
+        Ok(all_blocks)
     }
 
     pub fn generate_next_block(&mut self, data: String) -> Result<(), &'static str> {

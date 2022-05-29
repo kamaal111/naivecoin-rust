@@ -1,9 +1,11 @@
-use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
-use serde::Serialize;
+use mongodb::{
+    bson::doc, options::IndexOptions, results as mongodb_results, Client, Collection, IndexModel,
+};
+use serde::{Deserialize, Serialize};
 
 const DATABASE_NAME: &'static str = "naivecoin";
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Block {
     pub index: u64,
     pub hash: String,
@@ -41,14 +43,44 @@ impl Block {
                 data: "The Genesis block!!!".to_string(),
             };
 
-            match collection.insert_one(genesis_block, None).await {
-                Err(_) => return Err("failed to insert genesis block"),
+            match genesis_block.insert(&client).await {
+                Err(error) => return Err(error),
                 Ok(_) => (),
             };
             println!("successfully inserted genesis block");
         }
 
         Ok(())
+    }
+
+    pub async fn get_all(client: &Client) -> Result<Vec<Block>, &'static str> {
+        let cursor = Block::collection(&client).find(None, None).await;
+
+        let mut blocks: Vec<Block> = Vec::new();
+        for doc in cursor {
+            let block = match doc.deserialize_current() {
+                Err(error) => {
+                    println!("{:?}", error);
+                    return Err("failed to deserialize document");
+                }
+                Ok(value) => value,
+            };
+            blocks.push(block);
+        }
+
+        return Ok(blocks);
+    }
+}
+
+impl Block {
+    pub async fn insert(
+        &self,
+        client: &Client,
+    ) -> Result<mongodb_results::InsertOneResult, &'static str> {
+        match Block::collection(&client).insert_one(self, None).await {
+            Err(_) => Err("failed to insert block"),
+            Ok(value) => Ok(value),
+        }
     }
 }
 
