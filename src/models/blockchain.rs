@@ -28,17 +28,10 @@ impl Blockchain {
     }
 
     pub async fn generate_next_block(&self, data: String) -> Result<(), &'static str> {
-        // TODO: Get last block from database instead
-        let blocks = match self.blocks().await {
+        let latest_block = match Block::get_last(&self.context).await {
             Err(error) => return Err(error),
             Ok(value) => value,
         };
-
-        let latest_block = match blocks.last() {
-            None => return Err("could not get latest block"),
-            Some(value) => value,
-        };
-        println!("last block {:?}", latest_block);
 
         let payload = HashingPayload::from_block_for_next_block(&latest_block, data);
         let hash = calculate_hash(&payload);

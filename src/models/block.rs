@@ -1,7 +1,7 @@
 use futures::stream::TryStreamExt;
 use mongodb::{
     bson::doc,
-    options::{FindOptions, IndexOptions},
+    options::{FindOneOptions, IndexOptions},
     results as mongodb_results, Client, Collection, IndexModel,
 };
 use serde::{Deserialize, Serialize};
@@ -71,6 +71,25 @@ impl Block {
         }
 
         return Ok(blocks);
+    }
+
+    pub async fn get_last(client: &Client) -> Result<Block, &'static str> {
+        let find_options = FindOneOptions::builder()
+            .sort(doc! { "$natural": -1 })
+            .build();
+        let block = match Block::collection(&client)
+            .find_one(None, find_options)
+            .await
+        {
+            Err(error) => {
+                println!("error while getting last block: {:?}", error);
+                return Err("failed to get last block");
+            }
+            Ok(None) => return Err("failed to get last block"),
+            Ok(Some(value)) => value,
+        };
+
+        Ok(block)
     }
 }
 
