@@ -19,8 +19,35 @@ for (const router of routers) {
   app.use(router.path, router.router);
 }
 
+const statusCodeToMessageMap: {[code: number]: string} = {
+  400: 'Bad Request',
+  404: 'Not Found',
+};
+
+app.use(
+  (
+    _request: express.Request,
+    response: express.Response,
+    next: express.NextFunction
+  ) => {
+    const statusCode = response.statusCode;
+    if (statusCode === 404) {
+      next();
+      return;
+    }
+
+    response.status(statusCode).json({
+      details:
+        statusCodeToMessageMap[statusCode] ?? 'Okey we messed up, please help!',
+    });
+  }
+);
+
 app.use((_request, response) => {
-  response.status(404).json({details: 'Not Found'});
+  const statusCode = 404;
+  response
+    .status(statusCode)
+    .json({details: statusCodeToMessageMap[statusCode]});
 });
 
 const serverPort = process.env.SERVER_PORT ?? '3001';

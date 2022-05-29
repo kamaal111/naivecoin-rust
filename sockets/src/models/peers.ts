@@ -14,6 +14,8 @@ class Peers {
       socket => `${socket._socket.remoteAddress}:${socket._socket.remotePort}`
     );
   }
+
+  public connectToPeer(newPeer: string) {}
 }
 
 export default Peers;
