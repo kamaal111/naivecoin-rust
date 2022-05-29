@@ -1,24 +1,19 @@
-import type {NextFunction, Request, Response} from 'express';
-
-import Peers from '../models/peers';
+import type {NextFunction, Response} from 'express';
 
 import sendError from '../utils/sendError';
+import type {AppRequest} from '../types';
 
 type AddPeerPayload = {peer?: unknown} | undefined;
 
 class PeersController {
-  private peers: Peers;
+  constructor() {}
 
-  constructor() {
-    this.peers = new Peers();
-  }
-
-  public getPeers = (_request: Request, response: Response) => {
-    response.send(this.peers.socketAddresses);
+  public getPeers = (request: AppRequest, response: Response) => {
+    response.send(request.context!.peers.socketAddresses);
   };
 
   public addPeer = (
-    request: Request<undefined, undefined, AddPeerPayload>,
+    request: AppRequest<undefined, undefined, AddPeerPayload>,
     response: Response,
     next: NextFunction
   ) => {
@@ -28,7 +23,7 @@ class PeersController {
       return;
     }
 
-    this.peers.connectToPeer(peer);
+    request.context!.peers.connectToPeer(peer);
 
     response.status(204).send();
   };

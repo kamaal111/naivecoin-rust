@@ -3,7 +3,8 @@ import * as logger from 'morgan';
 
 import Peers from './models/peers';
 
-import type {AppRouter} from './types';
+import contextMiddleware from './middleware/contextMiddleware';
+import type {AppRequest, AppRouter, Context} from './types';
 
 const STATUS_CODE_TO_MESSAGE: {[code: number]: string} = {
   400: 'Bad Request',
@@ -11,6 +12,9 @@ const STATUS_CODE_TO_MESSAGE: {[code: number]: string} = {
 };
 
 const peers = new Peers();
+const context: Context = {
+  peers,
+};
 
 class App {
   private app = express();
@@ -35,6 +39,7 @@ class App {
   private initializeMiddleware() {
     this.app.use(logger('dev'));
     this.app.use(express.json());
+    this.app.use(contextMiddleware(context));
   }
 
   private initializeRoutes(routers: AppRouter[]) {
@@ -56,7 +61,7 @@ class App {
   }
 
   private errorHandler(
-    _request: express.Request,
+    _request: AppRequest,
     response: express.Response,
     next: express.NextFunction
   ) {
