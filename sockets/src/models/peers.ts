@@ -87,6 +87,8 @@ class Peers {
 
       switch (message.type) {
         case SocketMessageType.QUERY_ALL:
+          // TODO:
+
           // Get all blocks
 
           // Send all blocks
@@ -100,6 +102,8 @@ class Peers {
           // });
           break;
         case SocketMessageType.QUERY_LATEST:
+          // TODO:
+
           // Get latest block
 
           // Broadcast latest block
@@ -150,18 +154,25 @@ class Peers {
             this.sendError({socket, message: 'Invalid message sent'});
             return;
           }
+          // TODO:
 
           // Get latest block
           //  if latestBlockReceived.index <= latestBlockHeld.index return; // do nothing everything is well
+
+          // TODO:
 
           // if latestBlockHeld.hash === latestBlockReceived.previousHash
           // save block in to chain
           // Broadcast latest block
           // return
 
+          // TODO:
+
           // if receivedBlocks.length === 1
           // broadcast to get all blocks
           // return
+
+          // TODO:
 
           // replace whole chain call
           // Broadcast latest block

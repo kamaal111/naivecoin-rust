@@ -21,6 +21,7 @@ class PeersRouter implements AppRouter {
   private initializeRoutes() {
     this.router.get('/', this.controller.getPeers);
     this.router.post('/', this.controller.addPeer);
+    this.router.post('/mined', this.controller.minedBlock);
   }
 }
 
