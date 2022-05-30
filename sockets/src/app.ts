@@ -32,8 +32,10 @@ class App {
     socketsPort: number;
   }) {
     this.app.listen(serverPort, () => {
-      console.log(`listening on port ${serverPort}`);
+      console.log(`server listening on port ${serverPort}`);
     });
+
+    peers.listen(socketsPort);
   }
 
   private initializeMiddleware() {
