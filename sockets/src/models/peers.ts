@@ -1,5 +1,7 @@
 import * as WebSocket from 'ws';
 
+import Block from './block';
+
 import {jsonToObject} from '../utils/json';
 
 enum SocketMessageType {
@@ -139,18 +141,10 @@ class Peers {
             return;
           }
 
-          const latestBlockReceived = receivedBlocks.at(-1);
-          const parentHashIsAOptionalString =
-            latestBlockReceived?.parent_hash == null ||
-            typeof latestBlockReceived.parent_hash === 'string';
-          if (
-            latestBlockReceived == null ||
-            !parentHashIsAOptionalString ||
-            typeof latestBlockReceived.index !== 'number' ||
-            typeof latestBlockReceived.hash !== 'string' ||
-            typeof latestBlockReceived.timestamp !== 'number' ||
-            typeof latestBlockReceived.data !== 'string'
-          ) {
+          const latestBlockReceived = new Block(
+            (receivedBlocks.at(-1) ?? {}) as any
+          );
+          if (!latestBlockReceived.isValidBlockStructure) {
             this.sendError({socket, message: 'Invalid message sent'});
             return;
           }
@@ -218,46 +212,6 @@ class Peers {
 
   private send({socket, message}: {socket: WebSocket; message: SocketMessage}) {
     socket.send(JSON.stringify(message));
-  }
-}
-
-class Block {
-  public index: number;
-  public hash: string;
-  public previousHash?: string | null;
-  public timestamp: number;
-  public data: string;
-
-  constructor({
-    index,
-    hash,
-    previousHash,
-    timestamp,
-    data,
-  }: {
-    index: number;
-    hash: string;
-    previousHash: string | null;
-    timestamp: number;
-    data: string;
-  }) {
-    this.index = index;
-    this.previousHash = previousHash;
-    this.timestamp = timestamp;
-    this.data = data;
-    this.hash = hash;
-
-    Object.freeze(this);
-  }
-
-  public get isValidBlockStructure() {
-    return (
-      typeof this.index === 'number' &&
-      typeof this.hash === 'string' &&
-      (typeof this.previousHash === 'string' || this.previousHash == null) &&
-      typeof this.timestamp === 'number' &&
-      typeof this.data === 'string'
-    );
   }
 }
 
