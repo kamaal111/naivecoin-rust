@@ -19,3 +19,5 @@ export type AppRequest<
 > = Request<Params, ResponseBody, RequestBody, RequestQuery> & {
   context?: Context;
 };
+
+export type Result<T, E = Error> = {ok: true; value: T} | {ok: false; error: E};
