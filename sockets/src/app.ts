@@ -68,7 +68,7 @@ class App {
     next: express.NextFunction
   ) {
     const statusCode = response.statusCode;
-    if (statusCode === 404) {
+    if (statusCode === 404 || statusCode === 200) {
       next();
       return;
     }
