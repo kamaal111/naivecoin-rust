@@ -25,12 +25,14 @@
   "dependencies": {
     "express": "^4.18.1",
     "morgan": "^1.10.0",
+    "superagent": "^7.1.6",
     "ws": "^8.7.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/morgan": "^1.9.3",
     "@types/node": "^17.0.36",
+    "@types/superagent": "^4.1.15",
     "@types/ws": "^8.5.3",
     "gts": "^3.1.0",
     "nodemon": "^2.0.16",

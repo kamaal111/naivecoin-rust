@@ -1,4 +1,6 @@
-class Block {
+import type {BlockType} from '../types';
+
+class Block implements BlockType {
   public index: number;
   public hash: string;
   public parent_hash?: string | null;

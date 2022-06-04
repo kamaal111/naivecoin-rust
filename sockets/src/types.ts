@@ -21,3 +21,11 @@ export type AppRequest<
 };
 
 export type Result<T, E = Error> = {ok: true; value: T} | {ok: false; error: E};
+
+export type BlockType = {
+  index: number;
+  hash: string;
+  parent_hash?: string | null;
+  timestamp: number;
+  data: string;
+};

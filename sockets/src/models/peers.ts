@@ -3,6 +3,7 @@ import * as WebSocket from 'ws';
 import Block from './block';
 
 import {jsonToObject} from '../utils/json';
+import CoreClient from '../clients/core';
 
 enum SocketMessageType {
   QUERY_LATEST = 0,
@@ -22,6 +23,7 @@ type WebSocketPrivateAPIs = {
 
 class Peers {
   private _sockets: WebSocket[] = [];
+  private blocksClient = new CoreClient().blocks;
 
   constructor() {}
 
@@ -66,7 +68,7 @@ class Peers {
   }
 
   private initializeMessageHandler(socket: WebSocket) {
-    socket.on('message', data => {
+    socket.on('message', async data => {
       if (typeof data !== 'string') {
         this.sendError({socket, message: 'Invalid message sent'});
         return;
@@ -89,19 +91,22 @@ class Peers {
 
       switch (message.type) {
         case SocketMessageType.QUERY_ALL:
-          // TODO:
+          const allBlocksResult = await this.blocksClient.getAll();
+          if ('error' in allBlocksResult) {
+            console.log(
+              'something went wrong while getting all blocks; error:',
+              allBlocksResult.error
+            );
+            return;
+          }
 
-          // Get all blocks
-
-          // Send all blocks
-
-          // this.send({
-          //   socket,
-          //   message: {
-          //     type: SocketMessageType.RESPONSE_BLOCKCHAIN,
-          //     data: JSON.stringify(<all blocks>),
-          //   },
-          // });
+          this.send({
+            socket,
+            message: {
+              type: SocketMessageType.RESPONSE_BLOCKCHAIN,
+              data: JSON.stringify(allBlocksResult.value),
+            },
+          });
           break;
         case SocketMessageType.QUERY_LATEST:
           // TODO:
