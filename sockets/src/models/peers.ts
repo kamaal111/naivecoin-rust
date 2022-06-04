@@ -226,10 +226,28 @@ class Peers {
     }
 
     if (latestBlockHeld.hash === latestBlockReceived.parent_hash) {
-      // TODO:
-      // save block in to chain
-      // Broadcast latest block
-      // return
+      const addToChainResult = await this.blocksClient.addToChain(
+        latestBlockReceived
+      );
+      if ('error' in addToChainResult) {
+        this.sendError({
+          socket,
+          message: 'Okey we messed up, please help!',
+        });
+        console.log(
+          'something went wrong while adding block to chain; error:',
+          addToChainResult.error
+        );
+        return;
+      }
+
+      this.broadcast({
+        message: {
+          type: SocketMessageType.RESPONSE_BLOCKCHAIN,
+          data: JSON.stringify([latestBlockReceived]),
+        },
+      });
+      return;
     }
 
     // TODO:

@@ -50,6 +50,33 @@ impl Blockchain {
         return Ok(());
     }
 
+    pub async fn add_to_chain_from_response(
+        &self,
+        request_body: &String,
+    ) -> Result<(), &'static str> {
+        let next_block: Block = match serde_json::from_str(request_body) {
+            Err(error) => {
+                println!("error: {:?}", error);
+                return Err("invalid payload");
+            }
+            Ok(value) => value,
+        };
+
+        let latest_block = match Block::get_last(&self.context).await {
+            Err(error) => return Err(error),
+            Ok(value) => value,
+        };
+
+        match self.add_to_chain(&next_block, &latest_block).await {
+            Err(error) => return Err(error),
+            Ok(_) => (),
+        };
+
+        Ok(())
+    }
+}
+
+impl Blockchain {
     async fn add_to_chain(
         &self,
         next_block: &Block,
@@ -67,9 +94,7 @@ impl Blockchain {
 
         return Ok(());
     }
-}
 
-impl Blockchain {
     fn validate_next_block(&self, next_block: &Block, latest_block: &Block) -> bool {
         next_block.index == latest_block.index + 1
             && next_block.parent_hash == Some(latest_block.hash.clone())

@@ -1,4 +1,4 @@
-import {get} from '../utils/request';
+import {get, post} from '../utils/request';
 
 import type {BlockType, Result} from '../types';
 
@@ -15,6 +15,10 @@ class BlocksClient {
 
   public async getLatest(): Promise<Result<BlockType[]>> {
     return get({url: this.makeURL('?latest=1')});
+  }
+
+  public async addToChain(payload: BlockType): Promise<Result<undefined>> {
+    return post({url: this.makeURL(), payload});
   }
 
   private makeURL(extension = '') {

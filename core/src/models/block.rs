@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 const DATABASE_NAME: &'static str = "naivecoin";
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Block {
     pub index: u64,
     pub hash: String,

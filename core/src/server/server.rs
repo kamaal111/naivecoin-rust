@@ -82,12 +82,23 @@ async fn get_blocks(data: web::Data<AppState>, info: web::Query<AuthRequest>) ->
 }
 
 #[post("/blocks")]
-async fn mine_blocks(data: web::Data<AppState>, request_body: String) -> impl Responder {
-    if request_body.len() < 2 {
-        println!("error: invalid payload");
-        return error_responses::bad_request();
-    }
+async fn add_block_to_chain(data: web::Data<AppState>, request_body: String) -> impl Responder {
+    let database_client = data.database_client.clone().unwrap();
+    let blockchain = Blockchain::new(&database_client);
 
+    match blockchain.add_to_chain_from_response(&request_body).await {
+        Err(err) => {
+            println!("error: {}", err);
+            return error_responses::bad_request();
+        }
+        Ok(()) => (),
+    };
+
+    HttpResponse::NoContent().body("")
+}
+
+#[post("/mine")]
+async fn mine_blocks(data: web::Data<AppState>, request_body: String) -> impl Responder {
     let request_body: Value = match serde_json::from_str(&request_body) {
         Err(_) => {
             println!("error: invalid payload");
