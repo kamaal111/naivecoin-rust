@@ -250,11 +250,12 @@ class Peers {
       return;
     }
 
-    // TODO:
-
-    // if receivedBlocks.length === 1
-    // broadcast to get all blocks
-    // return
+    if (receivedBlocks.length === 1) {
+      this.broadcast({
+        message: {type: SocketMessageType.QUERY_ALL, data: null},
+      });
+      return;
+    }
 
     // TODO:
 
