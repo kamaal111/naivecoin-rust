@@ -5,6 +5,7 @@ use super::models::blockchain::Blockchain;
 
 use actix_web::{get, http, post, web, App, HttpResponse, HttpServer, Responder};
 use mongodb::Client;
+use serde::Deserialize;
 use serde_json::Value;
 
 #[derive(Debug, Clone)]
@@ -47,13 +48,30 @@ async fn hello() -> impl Responder {
         .body(format!("{{\"hello\": \"{}\"}}", "Kamaal"))
 }
 
+#[derive(Debug, Deserialize)]
+pub struct AuthRequest {
+    latest: Option<u8>,
+}
+
 #[get("/blocks")]
-async fn get_blocks(data: web::Data<AppState>) -> impl Responder {
+async fn get_blocks(data: web::Data<AppState>, info: web::Query<AuthRequest>) -> impl Responder {
     let database_client = data.database_client.clone().unwrap();
     let blockchain = Blockchain::new(&database_client);
 
-    let blocks = blockchain.blocks().await.expect("failed to get blocks");
+    let get_latest_block: bool = match info.latest {
+        None => false,
+        Some(0) => false,
+        Some(1) => true,
+        Some(_) => return error_responses::bad_request(),
+    };
 
+    if get_latest_block {
+        return HttpResponse::Ok()
+            .append_header((http::header::CONTENT_TYPE, mime::APPLICATION_JSON))
+            .body(format!("{{\"hello\": \"{}\"}}", "Kamaal"));
+    }
+
+    let blocks = blockchain.blocks().await.expect("failed to get blocks");
     HttpResponse::Ok()
         .append_header((http::header::CONTENT_TYPE, mime::APPLICATION_JSON))
         .json(blocks)
