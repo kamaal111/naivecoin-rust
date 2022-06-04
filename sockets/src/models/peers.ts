@@ -257,10 +257,27 @@ class Peers {
       return;
     }
 
-    // TODO:
+    const replaceChainResult = await this.blocksClient.replaceChain(
+      receivedBlocks
+    );
+    if ('error' in replaceChainResult) {
+      this.sendError({
+        socket,
+        message: 'Okey we messed up, please help!',
+      });
+      console.log(
+        'something went wrong while replacing chaing; error:',
+        replaceChainResult.error
+      );
+      return;
+    }
 
-    // replace whole chain call
-    // Broadcast latest block
+    this.broadcast({
+      message: {
+        type: SocketMessageType.RESPONSE_BLOCKCHAIN,
+        data: JSON.stringify([receivedBlocks.at(-1)]),
+      },
+    });
   }
 
   private broadcast({message}: {message: SocketMessage}) {

@@ -50,7 +50,7 @@ impl Blockchain {
         return Ok(());
     }
 
-    pub async fn add_to_chain_from_response(
+    pub async fn add_to_chain_from_request(
         &self,
         request_body: &String,
     ) -> Result<(), &'static str> {
@@ -71,6 +71,26 @@ impl Blockchain {
             Err(error) => return Err(error),
             Ok(_) => (),
         };
+
+        Ok(())
+    }
+
+    pub async fn replace_chain_from_request(
+        &self,
+        request_body: &String,
+    ) -> Result<(), &'static str> {
+        let new_chain: Vec<Block> = match serde_json::from_str(request_body) {
+            Err(error) => {
+                println!("error: {:?}", error);
+                return Err("invalid payload");
+            }
+            Ok(value) => value,
+        };
+
+        // Validate if new chain is valid
+        // if invalid return error
+
+        // Flush database and replace database with current chain
 
         Ok(())
     }

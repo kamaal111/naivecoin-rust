@@ -21,6 +21,10 @@ class BlocksClient {
     return post({url: this.makeURL(), payload});
   }
 
+  public async replaceChain(payload: BlockType[]): Promise<Result<undefined>> {
+    return post({url: this.makeURL('/replace-chain'), payload});
+  }
+
   private makeURL(extension = '') {
     return `${BASE_URL}${this.path}${extension}`;
   }
