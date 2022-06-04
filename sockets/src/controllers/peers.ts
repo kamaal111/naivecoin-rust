@@ -15,7 +15,7 @@ class PeersController {
   public minedBlock = (request: AppRequest, response: Response) => {
     // TODO:
 
-    // get latest block
+    // get latest block from request
 
     // broadcast latest block
 

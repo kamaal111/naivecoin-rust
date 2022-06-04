@@ -19,12 +19,11 @@ impl Blockchain {
 
 impl Blockchain {
     pub async fn blocks(&self) -> Result<Vec<Block>, &'static str> {
-        let all_blocks = match Block::get_all(&self.context).await {
-            Err(error) => return Err(error),
-            Ok(value) => value,
-        };
+        Block::get_all(&self.context).await
+    }
 
-        Ok(all_blocks)
+    pub async fn get_latest_block(&self) -> Result<Block, &'static str> {
+        Block::get_last(&self.context).await
     }
 
     pub async fn generate_next_block(&self, data: String) -> Result<(), &'static str> {

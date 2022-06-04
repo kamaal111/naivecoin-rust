@@ -91,91 +91,19 @@ class Peers {
 
       switch (message.type) {
         case SocketMessageType.QUERY_ALL:
-          const allBlocksResult = await this.blocksClient.getAll();
-          if ('error' in allBlocksResult) {
-            console.log(
-              'something went wrong while getting all blocks; error:',
-              allBlocksResult.error
-            );
-            return;
-          }
-
-          this.send({
-            socket,
-            message: {
-              type: SocketMessageType.RESPONSE_BLOCKCHAIN,
-              data: JSON.stringify(allBlocksResult.value),
-            },
-          });
+          this.handleQueryAllMessage(socket);
           break;
         case SocketMessageType.QUERY_LATEST:
-          // TODO:
-
-          // Get latest block
-
-          // Broadcast latest block
-
-          // this.broadcast({
-          //   message: {
-          //     type: SocketMessageType.RESPONSE_BLOCKCHAIN,
-          //     data: JSON.stringify([this.blockChain.getLatestBlock()]),
-          //   },
-          // });
+          this.handleQueryLatestMessage(socket);
           break;
         case SocketMessageType.RESPONSE_BLOCKCHAIN:
-          const receivedBlocksResult = jsonToObject<
-            {
-              index: number;
-              hash: string;
-              parent_hash?: string | null;
-              timestamp: number;
+          this.handleBlockchainResponseMessage({
+            socket,
+            message: message as {
+              type: SocketMessageType;
               data: string;
-            }[]
-          >(message.data);
-          if ('error' in receivedBlocksResult) {
-            this.sendError({
-              socket,
-              message: 'Okey we messed up, please help!',
-            });
-            return;
-          }
-
-          const receivedBlocks = receivedBlocksResult.value;
-          if (!Array.isArray(receivedBlocks) || receivedBlocks.length === 0) {
-            this.sendError({socket, message: 'Invalid message sent'});
-            return;
-          }
-
-          const latestBlockReceived = new Block(
-            (receivedBlocks.at(-1) ?? {}) as any
-          );
-          if (!latestBlockReceived.isValidBlockStructure) {
-            this.sendError({socket, message: 'Invalid message sent'});
-            return;
-          }
-          // TODO:
-
-          // Get latest block
-          //  if latestBlockReceived.index <= latestBlockHeld.index return; // do nothing everything is well
-
-          // TODO:
-
-          // if latestBlockHeld.hash === latestBlockReceived.previousHash
-          // save block in to chain
-          // Broadcast latest block
-          // return
-
-          // TODO:
-
-          // if receivedBlocks.length === 1
-          // broadcast to get all blocks
-          // return
-
-          // TODO:
-
-          // replace whole chain call
-          // Broadcast latest block
-
+            },
+          });
           break;
         case SocketMessageType.ERROR:
           return;
@@ -183,6 +111,125 @@ class Peers {
           break;
       }
     });
+  }
+
+  private async handleQueryAllMessage(socket: WebSocket) {
+    const allBlocksResult = await this.blocksClient.getAll();
+    if ('error' in allBlocksResult) {
+      this.sendError({
+        socket,
+        message: 'Okey we messed up, please help!',
+      });
+      console.log(
+        'something went wrong while getting all blocks; error:',
+        allBlocksResult.error
+      );
+      return;
+    }
+
+    this.send({
+      socket,
+      message: {
+        type: SocketMessageType.RESPONSE_BLOCKCHAIN,
+        data: JSON.stringify(allBlocksResult.value),
+      },
+    });
+  }
+
+  private async handleQueryLatestMessage(socket: WebSocket) {
+    const latestBlockResult = await this.blocksClient.getLatest();
+    if ('error' in latestBlockResult) {
+      this.sendError({
+        socket,
+        message: 'Okey we messed up, please help!',
+      });
+      console.log(
+        'something went wrong while getting the latest block; error:',
+        latestBlockResult.error
+      );
+      return;
+    }
+
+    this.broadcast({
+      message: {
+        type: SocketMessageType.RESPONSE_BLOCKCHAIN,
+        data: JSON.stringify(latestBlockResult.value),
+      },
+    });
+  }
+
+  private async handleBlockchainResponseMessage({
+    socket,
+    message,
+  }: {
+    socket: WebSocket;
+    message: {
+      type: SocketMessageType;
+      data: string;
+    };
+  }) {
+    const receivedBlocksResult = jsonToObject<
+      {
+        index: number;
+        hash: string;
+        parent_hash?: string | null;
+        timestamp: number;
+        data: string;
+      }[]
+    >(message.data);
+    if ('error' in receivedBlocksResult) {
+      this.sendError({
+        socket,
+        message: 'Okey we messed up, please help!',
+      });
+      return;
+    }
+
+    const receivedBlocks = receivedBlocksResult.value;
+    if (!Array.isArray(receivedBlocks) || receivedBlocks.length === 0) {
+      this.sendError({socket, message: 'Invalid message sent'});
+      return;
+    }
+
+    const latestBlockReceived = new Block((receivedBlocks.at(-1) ?? {}) as any);
+    if (!latestBlockReceived.isValidBlockStructure) {
+      this.sendError({socket, message: 'Invalid message sent'});
+      return;
+    }
+
+    const latestBlockResult = await this.blocksClient.getLatest();
+    if ('error' in latestBlockResult) {
+      this.sendError({
+        socket,
+        message: 'Okey we messed up, please help!',
+      });
+      console.log(
+        'something went wrong while getting the latest block; error:',
+        latestBlockResult.error
+      );
+      return;
+    }
+    // TODO:
+
+    //  if latestBlockReceived.index <= latestBlockHeld.index return; // do nothing everything is well
+
+    // TODO:
+
+    // if latestBlockHeld.hash === latestBlockReceived.previousHash
+    // save block in to chain
+    // Broadcast latest block
+    // return
+
+    // TODO:
+
+    // if receivedBlocks.length === 1
+    // broadcast to get all blocks
+    // return
+
+    // TODO:
+
+    // replace whole chain call
+    // Broadcast latest block
   }
 
   private broadcast({message}: {message: SocketMessage}) {

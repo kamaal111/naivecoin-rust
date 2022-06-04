@@ -66,9 +66,13 @@ async fn get_blocks(data: web::Data<AppState>, info: web::Query<AuthRequest>) ->
     };
 
     if get_latest_block {
+        let block = blockchain
+            .get_latest_block()
+            .await
+            .expect("failed to get latest block");
         return HttpResponse::Ok()
             .append_header((http::header::CONTENT_TYPE, mime::APPLICATION_JSON))
-            .body(format!("{{\"hello\": \"{}\"}}", "Kamaal"));
+            .json(vec![block]);
     }
 
     let blocks = blockchain.blocks().await.expect("failed to get blocks");
