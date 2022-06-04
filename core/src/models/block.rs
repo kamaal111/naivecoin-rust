@@ -94,6 +94,16 @@ impl Block {
 
         Ok(block)
     }
+
+    pub async fn drop(client: &Client) -> Result<(), &'static str> {
+        match Block::collection(&client).drop(None).await {
+            Err(error) => {
+                println!("error while dropping collection: {:?}", error);
+                Err("failed to drop collection")
+            }
+            Ok(()) => Ok(()),
+        }
+    }
 }
 
 impl Block {

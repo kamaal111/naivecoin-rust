@@ -96,7 +96,12 @@ impl Blockchain {
             return Err("invalid chain provided");
         }
 
-        // Flush database and replace database with current chain
+        match Block::drop(&self.context).await {
+            Err(error) => return Err(error),
+            Ok(()) => (),
+        };
+
+        // replace database with current chain
 
         Ok(())
     }
