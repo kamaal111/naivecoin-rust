@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 const DATABASE_NAME: &'static str = "naivecoin";
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize, PartialEq)]
 pub struct Block {
     pub index: u64,
     pub hash: String,
@@ -18,6 +18,18 @@ pub struct Block {
 }
 
 impl Block {
+    pub fn genesis_block() -> Block {
+        let block = Block {
+            index: 0,
+            hash: "cd2fb2ace926608315b2a5bd1bc2a259dce057a21ed63351adc0b1326da2a99e".to_string(),
+            parent_hash: None,
+            timestamp: 1652722519,
+            data: "The Genesis block!!!".to_string(),
+        };
+
+        block
+    }
+
     pub async fn create_index(client: &Client) -> Result<(), &'static str> {
         let options = IndexOptions::builder().unique(true).build();
         let model = IndexModel::builder()
@@ -37,16 +49,7 @@ impl Block {
         };
 
         if amount_of_blocks == 0 {
-            let genesis_block = Block {
-                index: 0,
-                hash: "cd2fb2ace926608315b2a5bd1bc2a259dce057a21ed63351adc0b1326da2a99e"
-                    .to_string(),
-                parent_hash: None,
-                timestamp: 1652722519,
-                data: "The Genesis block!!!".to_string(),
-            };
-
-            match genesis_block.insert(&client).await {
+            match Block::genesis_block().insert(&client).await {
                 Err(error) => return Err(error),
                 Ok(_) => (),
             };

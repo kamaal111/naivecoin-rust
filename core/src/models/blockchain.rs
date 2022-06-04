@@ -87,8 +87,14 @@ impl Blockchain {
             Ok(value) => value,
         };
 
-        // Validate if new chain is valid
-        // if invalid return error
+        let current_chain = match self.blocks().await {
+            Err(error) => return Err(error),
+            Ok(value) => value,
+        };
+
+        if !self.validate_chain(&new_chain, &current_chain) {
+            return Err("invalid chain provided");
+        }
 
         // Flush database and replace database with current chain
 
@@ -113,6 +119,28 @@ impl Blockchain {
         };
 
         return Ok(());
+    }
+
+    fn validate_chain(&self, new_chain: &Vec<Block>, current_chain: &Vec<Block>) -> bool {
+        if new_chain.len() <= current_chain.len() {
+            return false;
+        }
+
+        let genesis_block = Block::genesis_block();
+
+        if genesis_block != new_chain[0] {
+            return false;
+        }
+
+        for index in 1..new_chain.len() {
+            let next_block = &new_chain[index];
+            let previous_block = &new_chain[index - 1];
+            if !self.validate_next_block(next_block, previous_block) {
+                return false;
+            }
+        }
+
+        false
     }
 
     fn validate_next_block(&self, next_block: &Block, latest_block: &Block) -> bool {
