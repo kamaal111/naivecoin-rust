@@ -4,6 +4,7 @@ import Block from './block';
 
 import {jsonToObject} from '../utils/json';
 import CoreClient from '../clients/core';
+import isEmptyArray from '../utils/isEmptyArray';
 
 enum SocketMessageType {
   QUERY_LATEST = 0,
@@ -186,7 +187,7 @@ class Peers {
     }
 
     const receivedBlocks = receivedBlocksResult.value;
-    if (!Array.isArray(receivedBlocks) || receivedBlocks.length === 0) {
+    if (isEmptyArray(receivedBlocks)) {
       this.sendError({socket, message: 'Invalid message sent'});
       return;
     }
@@ -209,16 +210,27 @@ class Peers {
       );
       return;
     }
-    // TODO:
 
-    //  if latestBlockReceived.index <= latestBlockHeld.index return; // do nothing everything is well
+    if (isEmptyArray(latestBlockResult.value)) {
+      this.sendError({
+        socket,
+        message: 'Okey we messed up, please help!',
+      });
+      return;
+    }
 
-    // TODO:
+    const [latestBlockHeld] = latestBlockResult.value;
+    if (latestBlockReceived.index <= latestBlockHeld.index) {
+      // do nothing everything is well
+      return;
+    }
 
-    // if latestBlockHeld.hash === latestBlockReceived.previousHash
-    // save block in to chain
-    // Broadcast latest block
-    // return
+    if (latestBlockHeld.hash === latestBlockReceived.parent_hash) {
+      // TODO:
+      // save block in to chain
+      // Broadcast latest block
+      // return
+    }
 
     // TODO:
 
