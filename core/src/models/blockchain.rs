@@ -101,7 +101,10 @@ impl Blockchain {
             Ok(()) => (),
         };
 
-        // replace database with current chain
+        match Block::insert_many(&self.context, &new_chain).await {
+            Err(error) => return Err(error),
+            Ok(_) => (),
+        }
 
         Ok(())
     }

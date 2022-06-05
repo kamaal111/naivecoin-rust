@@ -17,6 +17,7 @@ pub struct Block {
     pub data: String,
 }
 
+// General static methods
 impl Block {
     pub fn genesis_block() -> Block {
         let block = Block {
@@ -29,7 +30,10 @@ impl Block {
 
         block
     }
+}
 
+// Database static methods
+impl Block {
     pub async fn create_index(client: &Client) -> Result<(), &'static str> {
         let options = IndexOptions::builder().unique(true).build();
         let model = IndexModel::builder()
@@ -98,14 +102,31 @@ impl Block {
     pub async fn drop(client: &Client) -> Result<(), &'static str> {
         match Block::collection(&client).drop(None).await {
             Err(error) => {
-                println!("error while dropping collection: {:?}", error);
+                println!(
+                    "error while dropping {} collection: {:?}",
+                    DATABASE_NAME, error
+                );
                 Err("failed to drop collection")
             }
             Ok(()) => Ok(()),
         }
     }
+
+    pub async fn insert_many(
+        client: &Client,
+        blocks: &Vec<Block>,
+    ) -> Result<mongodb_results::InsertManyResult, &'static str> {
+        match Block::collection(&client).insert_many(blocks, None).await {
+            Err(error) => {
+                println!("error while inserting blocks: {:?}", error);
+                Err("failed to insert blocks")
+            }
+            Ok(value) => Ok(value),
+        }
+    }
 }
 
+// Database methods
 impl Block {
     pub async fn insert(
         &self,
@@ -118,6 +139,7 @@ impl Block {
     }
 }
 
+// Internal methods
 impl Block {
     fn collection_name() -> &'static str {
         "blocks"
