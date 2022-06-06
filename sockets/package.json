@@ -8,6 +8,8 @@
     "start": "node .",
     "compile": "tsc",
     "dev": "nodemon src/main.ts",
+    "test": "jest",
+    "test:cov": "jest --coverage",
     "lint": "gts lint",
     "clean": "gts clean",
     "fix": "gts fix"
@@ -30,13 +32,17 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
+    "@types/jest": "^28.1.1",
     "@types/morgan": "^1.9.3",
     "@types/node": "^17.0.36",
     "@types/superagent": "^4.1.15",
     "@types/ws": "^8.5.3",
+    "codecov": "^3.8.3",
     "gts": "^3.1.0",
+    "jest": "^28.1.0",
     "nodemon": "^2.0.16",
     "prettier": "^2.6.2",
+    "ts-jest": "^28.0.4",
     "ts-node": "^10.8.0",
     "typescript": "^4.7.2"
   },
@@ -50,5 +56,12 @@
   "eslintIgnore": [
     "node_modules/",
     "build/"
-  ]
+  ],
+  "jest": {
+    "preset": "ts-jest",
+    "transform": {
+      "^.+\\.(ts|tsx)?$": "ts-jest",
+      "^.+\\.(js|jsx)$": "babel-jest"
+    }
+  }
 }

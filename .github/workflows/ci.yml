@@ -1,0 +1,36 @@
+name: CI
+on:
+  push:
+    branches:
+      - '*'
+jobs:
+  test:
+    name: Test sockets
+    timeout-minutes: 5
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Git - Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install node modules
+        run: |
+          cd sockets
+          yarn
+
+      - name: Test
+        run: |
+          cd sockets
+          yarn test:cov
+
+      - name: Codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          cd sockets
+          ./node_modules/.bin/codecov --token=$CODECOV_TOKEN
