@@ -33,4 +33,4 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           cd sockets
-          ./node_modules/.bin/codecov --token=$CODECOV_TOKEN
+          ./node_modules/.bin/codecov --token=$CODECOV_TOKEN || exit 1
