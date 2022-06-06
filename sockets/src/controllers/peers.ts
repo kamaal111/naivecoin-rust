@@ -12,16 +12,6 @@ class PeersController {
     response.send(request.context!.peers.socketAddresses);
   };
 
-  public minedBlock = (request: AppRequest, response: Response) => {
-    // TODO:
-
-    // get latest block from request
-
-    // broadcast latest block
-
-    response.status(204).send();
-  };
-
   public addPeer = (
     request: AppRequest<undefined, undefined, AddPeerPayload>,
     response: Response,
