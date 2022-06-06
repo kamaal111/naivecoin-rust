@@ -4,7 +4,7 @@ on:
     branches:
       - '*'
 jobs:
-  test:
+  test-sockets:
     name: Test sockets
     timeout-minutes: 5
     runs-on: ubuntu-22.04
@@ -26,11 +26,18 @@ jobs:
       - name: Test
         run: |
           cd sockets
-          yarn test:cov
+          yarn test
 
-      - name: Codecov
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  test-core:
+    name: Test Core
+    timeout-minutes: 5
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Git - Checkout
+        uses: actions/checkout@v2
+
+      - name: Test
         run: |
-          cd sockets
-          ./node_modules/.bin/codecov --token=$CODECOV_TOKEN || exit 1
+          cd core
+          cargo

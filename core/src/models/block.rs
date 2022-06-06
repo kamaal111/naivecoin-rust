@@ -151,3 +151,11 @@ impl Block {
             .collection::<Block>(Block::collection_name())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_block() {
+        assert_eq!(true, true);
+    }
+}
