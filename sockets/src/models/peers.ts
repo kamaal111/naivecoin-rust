@@ -5,6 +5,7 @@ import Block from './block';
 import {jsonToObject} from '../utils/json';
 import CoreClient from '../clients/core';
 import isEmptyArray from '../utils/isEmptyArray';
+import type {BlockType} from '../types';
 
 enum SocketMessageType {
   QUERY_LATEST = 0,
@@ -54,6 +55,15 @@ class Peers {
     });
 
     console.log(`sockets listening on port ${port}`);
+  }
+
+  public broadcastLatestBlocks(latestBlocks: BlockType[]) {
+    this.broadcast({
+      message: {
+        type: SocketMessageType.RESPONSE_BLOCKCHAIN,
+        data: JSON.stringify(latestBlocks),
+      },
+    });
   }
 
   private initializeConnection(socket: WebSocket) {
@@ -151,12 +161,7 @@ class Peers {
       return;
     }
 
-    this.broadcast({
-      message: {
-        type: SocketMessageType.RESPONSE_BLOCKCHAIN,
-        data: JSON.stringify(latestBlockResult.value),
-      },
-    });
+    this.broadcastLatestBlocks(latestBlockResult.value);
   }
 
   private async handleBlockchainResponseMessage({
@@ -241,12 +246,7 @@ class Peers {
         return;
       }
 
-      this.broadcast({
-        message: {
-          type: SocketMessageType.RESPONSE_BLOCKCHAIN,
-          data: JSON.stringify([latestBlockReceived]),
-        },
-      });
+      this.broadcastLatestBlocks([latestBlockReceived]);
       return;
     }
 
@@ -272,12 +272,7 @@ class Peers {
       return;
     }
 
-    this.broadcast({
-      message: {
-        type: SocketMessageType.RESPONSE_BLOCKCHAIN,
-        data: JSON.stringify([receivedBlocks.at(-1)]),
-      },
-    });
+    this.broadcastLatestBlocks([receivedBlocks.at(-1) as any]);
   }
 
   private broadcast({message}: {message: SocketMessage}) {

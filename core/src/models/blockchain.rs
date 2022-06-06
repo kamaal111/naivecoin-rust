@@ -26,7 +26,7 @@ impl Blockchain {
         Block::get_last(&self.context).await
     }
 
-    pub async fn generate_next_block(&self, data: String) -> Result<(), &'static str> {
+    pub async fn generate_next_block(&self, data: String) -> Result<Block, &'static str> {
         let latest_block = match Block::get_last(&self.context).await {
             Err(error) => return Err(error),
             Ok(value) => value,
@@ -47,7 +47,7 @@ impl Blockchain {
             Ok(_) => (),
         };
 
-        return Ok(());
+        return Ok(next_block);
     }
 
     pub async fn add_to_chain_from_request(

@@ -6,9 +6,11 @@ import Peers from './models/peers';
 import contextMiddleware from './middleware/contextMiddleware';
 import type {AppRequest, AppRouter, Context} from './types';
 
+const INTERNAL_SERVER_ERROR_MESSAGE = 'Okey we messed up, please help!';
 const STATUS_CODE_TO_MESSAGE: {[code: number]: string} = {
   400: 'Bad Request',
   404: 'Not Found',
+  500: INTERNAL_SERVER_ERROR_MESSAGE,
 };
 
 const peers = new Peers();
@@ -74,7 +76,7 @@ class App {
     }
 
     const message =
-      STATUS_CODE_TO_MESSAGE[statusCode] ?? 'Okey we messed up, please help!';
+      STATUS_CODE_TO_MESSAGE[statusCode] ?? INTERNAL_SERVER_ERROR_MESSAGE;
     response.status(statusCode).json({
       details: message,
     });

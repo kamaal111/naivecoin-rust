@@ -25,6 +25,10 @@ class BlocksClient {
     return post({url: this.makeURL('/replace-chain'), payload});
   }
 
+  public async mineBlock(payload: string): Promise<Result<BlockType>> {
+    return post({url: this.makeURL('/mine'), payload: {data: payload}});
+  }
+
   private makeURL(extension = '') {
     return `${BASE_URL}${this.path}${extension}`;
   }
