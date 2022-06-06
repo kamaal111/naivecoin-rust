@@ -13,10 +13,18 @@ jobs:
       - name: Git - Checkout
         uses: actions/checkout@v2
 
-      - uses: actions/cache@v2
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          path: '**/sockets/node_modules'
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/sockets/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+        env:
+          cache-name: cache-node-modules
 
       - name: Install node modules
         run: |
@@ -36,6 +44,15 @@ jobs:
     steps:
       - name: Git - Checkout
         uses: actions/checkout@v2
+
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        with:
+          path: '**/core/target'
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/core/Cargo.lock') }}
+        env:
+          cache-name: cache-rust-target
 
       - name: Test
         run: |
